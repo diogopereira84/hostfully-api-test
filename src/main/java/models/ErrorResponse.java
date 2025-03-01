@@ -16,5 +16,10 @@ public class ErrorResponse {
     private String path;
     private String error;
     private String message;
-    private Instant timestamp;
+    private String timestamp;
+    private String type;
+    private String title;
+    private int status;
+    private String detail;
+    private String instance;
 }
