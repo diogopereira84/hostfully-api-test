@@ -15,5 +15,5 @@ public class Property {
     private String id;
     private String alias;
     private String countryCode; // Changing to String to accommodate any arbitrary string value or empty object.
-    private Instant createdAt;
+    private String createdAt;
 }

@@ -3,11 +3,14 @@ package tests;
 import base.BaseTest;
 import io.restassured.response.Response;
 import models.ErrorResponse;
+import models.Property;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import services.AuthenticationService;
+import utils.DateTimeUtils;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public class PropertyTests extends BaseTest {
@@ -18,6 +21,24 @@ public class PropertyTests extends BaseTest {
                 {"34545"},
                 {"4814adee-cd2e-4c70-921d-19b4f0cd527i"}
         };
+    }
+
+    @Test
+    public void shouldReturn201WhenCreatingValidProperty() {
+
+        String propertyId = UUID.randomUUID().toString();
+        String alias = "Property Test Automation: " + propertyId;
+        String dateTime = DateTimeUtils.getCurrentUtcTimestamp();
+
+        Property property = Property.builder()
+                .id(propertyId)
+                .alias(alias)
+                .countryCode("BR")
+                .createdAt(dateTime)
+                .build();
+
+        Response response = propertyService.createProperty(property);
+        Assert.assertEquals(response.getStatusCode(), 201, "Expected 201 Created");
     }
 
     @Test(dataProvider = "invalidUUIDs")
