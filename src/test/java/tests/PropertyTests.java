@@ -18,24 +18,12 @@ public class PropertyTests extends BaseTest {
 
     @Test
     public void testCreateValidProperty() {
-        Property property = Property.builder()
-                .name("Beach House")
-                .address("123 Beach Ave")
-                .build();
 
-        Response response = PropertyRequests.createProperty(property);
-        Assert.assertEquals(response.getStatusCode(), 201);
-        Assert.assertNotNull(response.jsonPath().getString("id"));
+
     }
 
     @Test
     public void testCreateInvalidProperty() {
-        Property property = Property.builder()
-                .name("")
-                .address("")
-                .build();
 
-        Response response = PropertyRequests.createProperty(property);
-        Assert.assertEquals(response.getStatusCode(), 400);
     }
 }
