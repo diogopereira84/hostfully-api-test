@@ -5,8 +5,9 @@ import org.testng.annotations.BeforeClass;
 import services.AuthenticationService;
 import interfaces.IPropertyService;
 import services.PropertyService;
+import utils.AppSettings;
 
-//BaseTest for Dependency Injection
+// BaseTest for Dependency Injection
 public class BaseTest {
 
     protected AuthenticationService authService;
@@ -14,12 +15,12 @@ public class BaseTest {
 
     @BeforeClass
     public void setup() {
-        RestAssured.baseURI = "https://qa-assessment.svc.hostfully.com";
+        // Load application settings from environment variables or config file
+        String baseUri = AppSettings.get("API_BASE_URI", "https://qa-assessment.svc.hostfully.com");
+        String username = AppSettings.get("API_USERNAME");
+        String password = AppSettings.get("API_PASSWORD");
 
-        // Use environment variables for credentials
-        String username = System.getenv("API_USERNAME");
-        String password = System.getenv("API_PASSWORD");
-
+        RestAssured.baseURI = baseUri;
         authService = new AuthenticationService(username, password);
         propertyService = new PropertyService();
 
