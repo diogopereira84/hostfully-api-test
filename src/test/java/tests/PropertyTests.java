@@ -7,12 +7,12 @@ import models.Property;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.annotations.Listeners;
 import services.AuthenticationService;
 import utils.DateTimeUtils;
-
-import java.time.Instant;
 import java.util.UUID;
 
+@Listeners(utils.TestListener.class)
 public class PropertyTests extends BaseTest {
 
     @DataProvider(name = "invalidUUIDs")
@@ -23,9 +23,8 @@ public class PropertyTests extends BaseTest {
         };
     }
 
-    @Test
+    @Test(groups = {"positive", "regression"})
     public void shouldReturn201WhenCreatingValidProperty() {
-
         String propertyId = UUID.randomUUID().toString();
         String alias = "Property Test Automation: " + propertyId;
         String dateTime = DateTimeUtils.getCurrentUtcTimestamp();
@@ -41,7 +40,7 @@ public class PropertyTests extends BaseTest {
         Assert.assertEquals(response.getStatusCode(), 201, "Expected 201 Created");
     }
 
-    @Test(dataProvider = "invalidUUIDs")
+    @Test(dataProvider = "invalidUUIDs", groups = {"negative", "regression"})
     public void shouldReturn400WhenGettingPropertyWithInvalidUUID(String propertyId) {
         Response response = propertyService.getProperty(propertyId);
         Assert.assertEquals(response.getStatusCode(), 400, "Expected 400 Bad Request");
@@ -54,21 +53,21 @@ public class PropertyTests extends BaseTest {
         Assert.assertEquals(errorResponse.getInstance(), "/properties/" + propertyId);
     }
 
-    @Test
+    @Test(groups = {"negative", "regression"})
     public void shouldReturn204WhenPropertyNotFound() {
         String propertyId = UUID.randomUUID().toString();
         Response response = propertyService.getProperty(propertyId);
         Assert.assertEquals(response.getStatusCode(), 204, "Expected 204 No Content");
     }
 
-    @Test
+    @Test(groups = {"positive", "regression"})
     public void shouldReturn200WhenGettingPropertyWithValidCredentials() {
         String propertyId = "4814adee-cd2e-4c70-921d-19b4f0cd527d";
         Response response = propertyService.getProperty(propertyId);
         Assert.assertEquals(response.getStatusCode(), 200, "Expected 200 OK");
     }
 
-    @Test
+    @Test(groups = {"negative", "security", "regression"})
     public void shouldReturn401WhenGettingPropertyWithNoCredentials() {
         AuthenticationService.removeAuth();
         String propertyId = "4814adee-cd2e-4c70-921d-19b4f0cd527d";
@@ -84,7 +83,7 @@ public class PropertyTests extends BaseTest {
         Assert.assertNotNull(errorResponse.getTimestamp());
     }
 
-    @Test
+    @Test(groups = {"negative", "security", "regression"})
     public void shouldReturn401WhenGettingPropertyWithInvalidCredentials() {
         AuthenticationService.setInvalidAuth();
         String propertyId = "4814adee-cd2e-4c70-921d-19b4f0cd527d";

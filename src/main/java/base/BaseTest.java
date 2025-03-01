@@ -7,7 +7,7 @@ import interfaces.IPropertyService;
 import services.PropertyService;
 import utils.AppSettings;
 
-// BaseTest for Dependency Injection
+// BaseTest for Dependency Injection with parameterized environment
 public class BaseTest {
 
     protected AuthenticationService authService;
@@ -15,7 +15,7 @@ public class BaseTest {
 
     @BeforeClass
     public void setup() {
-        // Load application settings from environment variables or config file
+        // Load environment-specific settings
         String baseUri = AppSettings.get("API_BASE_URI", "https://qa-assessment.svc.hostfully.com");
         String username = AppSettings.get("API_USERNAME");
         String password = AppSettings.get("API_PASSWORD");
