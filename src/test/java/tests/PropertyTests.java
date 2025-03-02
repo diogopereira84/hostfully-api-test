@@ -5,10 +5,10 @@ import io.restassured.response.Response;
 import models.response.PropertyResponse;
 import models.response.ValidationErrorResponse;
 import models.request.Property;
-import org.testng.Assert;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 import services.AuthenticationService;
 import utils.DateTimeUtils;
 import utils.UUIDUtils;
@@ -28,95 +28,128 @@ public class PropertyTests extends BaseTest {
         };
     }
 
+    private SoftAssert softAssert; // Declare SoftAssert globally for each test
+
+    /**
+     * Initializes SoftAssert before each test.
+     */
+    private void initSoftAssert() {
+        softAssert = new SoftAssert();
+    }
+
     @Test(groups = {"positive", "regression"})
     public void shouldReturn201WhenCreatingValidPropertyTest() {
+        initSoftAssert();
+
         String expectedUUID = UUID.randomUUID().toString();
         String expectedAlias = "Property for Hostfully: " + expectedUUID;
         String dateTime = DateTimeUtils.getCurrentUtcTimestamp();
-        String expectedContryCode = "BR";
+        String expectedCountryCode = "BR";
 
         Property property = Property.builder()
                 .id(expectedUUID)
                 .alias(expectedAlias)
-                .countryCode(expectedContryCode)  // Country code is null in response
+                .countryCode(expectedCountryCode)
                 .createdAt(dateTime)
                 .build();
 
         Response response = propertyService.createProperty(property);
-
-        // Deserialize response
         PropertyResponse propertyResponse = response.as(PropertyResponse.class);
 
         // Assert HTTP status
-        Assert.assertEquals(response.getStatusCode(), 201, "Expected 201 Created");
+        softAssert.assertEquals(response.getStatusCode(), 201, "Expected 201 Created");
 
-        UUID ds = UUID.fromString(propertyResponse.getId());
+        // Validate UUID format
+        softAssert.assertTrue(UUIDUtils.isValidUUID(propertyResponse.getId()), "ID is not a valid UUID");
+
         // Assert response fields
-        Assert.assertTrue(UUIDUtils.isValidUUID(propertyResponse.getId()), "ID is not a valid UUID");
-        Assert.assertEquals(propertyResponse.getAlias(), expectedAlias, "Alias mismatch");
-        Assert.assertEquals(propertyResponse.getCountryCode(),expectedContryCode, "CountryCode mismatch");
+        softAssert.assertEquals(propertyResponse.getAlias(), expectedAlias, "Alias mismatch");
+        softAssert.assertEquals(propertyResponse.getCountryCode(), expectedCountryCode, "CountryCode mismatch");
 
         // Assert createdAt array values
         List<Integer> expectedCreatedAt = Arrays.asList(2025, 3, 1, 23, 37, 6, 536538509);
-        Assert.assertEquals(propertyResponse.getCreatedAt(), expectedCreatedAt, "CreatedAt mismatch");
+        softAssert.assertEquals(propertyResponse.getCreatedAt(), expectedCreatedAt, "CreatedAt mismatch");
+
+        // Collect all assertion failures at the end
+        softAssert.assertAll();
     }
 
     @Test(dataProvider = "invalidUUIDs", groups = {"negative", "regression"})
     public void shouldReturn400WhenGettingPropertyWithInvalidUUIDTest(String propertyId) {
+        initSoftAssert();
+
         Response response = propertyService.getProperty(propertyId);
-        Assert.assertEquals(response.getStatusCode(), 400, "Expected 400 Bad Request");
+        softAssert.assertEquals(response.getStatusCode(), 400, "Expected 400 Bad Request");
 
         ValidationErrorResponse validationErrorResponse = response.as(ValidationErrorResponse.class);
-        Assert.assertEquals(validationErrorResponse.getType(), "about:blank");
-        Assert.assertEquals(validationErrorResponse.getTitle(), "Bad Request");
-        Assert.assertEquals(validationErrorResponse.getStatus(), 400);
-        Assert.assertEquals(validationErrorResponse.getDetail(), "Failed to convert 'propertyId' with value: '" + propertyId + "'");
-        Assert.assertEquals(validationErrorResponse.getInstance(), "/properties/" + propertyId);
+        softAssert.assertEquals(validationErrorResponse.getType(), "about:blank");
+        softAssert.assertEquals(validationErrorResponse.getTitle(), "Bad Request");
+        softAssert.assertEquals(validationErrorResponse.getStatus(), 400);
+        softAssert.assertEquals(validationErrorResponse.getDetail(), "Failed to convert 'propertyId' with value: '" + propertyId + "'");
+        softAssert.assertEquals(validationErrorResponse.getInstance(), "/properties/" + propertyId);
+
+        softAssert.assertAll();
     }
 
     @Test(groups = {"negative", "regression"})
     public void shouldReturn204WhenPropertyNotFoundTest() {
+        initSoftAssert();
+
         String propertyId = UUID.randomUUID().toString();
         Response response = propertyService.getProperty(propertyId);
-        Assert.assertEquals(response.getStatusCode(), 204, "Expected 204 No Content");
+        softAssert.assertEquals(response.getStatusCode(), 204, "Expected 204 No Content");
+
+        softAssert.assertAll();
     }
 
     @Test(groups = {"positive", "regression"})
     public void shouldReturn200WhenGettingPropertyWithValidCredentialsTest() {
+        initSoftAssert();
+
         String propertyId = "4814adee-cd2e-4c70-921d-19b4f0cd527d";
         Response response = propertyService.getProperty(propertyId);
-        Assert.assertEquals(response.getStatusCode(), 200, "Expected 200 OK");
+        softAssert.assertEquals(response.getStatusCode(), 200, "Expected 200 OK");
+
+        softAssert.assertAll();
     }
 
     @Test(groups = {"negative", "security", "regression"})
     public void shouldReturn401WhenGettingPropertyWithNoCredentialsTest() {
+        initSoftAssert();
+
         AuthenticationService.removeAuth();
         String propertyId = "4814adee-cd2e-4c70-921d-19b4f0cd527d";
 
         Response response = propertyService.getProperty(propertyId);
         ValidationErrorResponse validationErrorResponse = response.as(ValidationErrorResponse.class);
 
-        Assert.assertEquals(response.getStatusCode(), 401, "Expected 401 Unauthorized");
-        Assert.assertEquals(validationErrorResponse.getException(), "Full authentication is required to access this resource");
-        Assert.assertEquals(validationErrorResponse.getPath(), "/properties/" + propertyId);
-        Assert.assertEquals(validationErrorResponse.getError(), "Unauthorized");
-        Assert.assertEquals(validationErrorResponse.getMessage(), "Error while authenticating your access");
-        Assert.assertNotNull(validationErrorResponse.getTimestamp());
+        softAssert.assertEquals(response.getStatusCode(), 401, "Expected 401 Unauthorized");
+        softAssert.assertEquals(validationErrorResponse.getException(), "Full authentication is required to access this resource");
+        softAssert.assertEquals(validationErrorResponse.getPath(), "/properties/" + propertyId);
+        softAssert.assertEquals(validationErrorResponse.getError(), "Unauthorized");
+        softAssert.assertEquals(validationErrorResponse.getMessage(), "Error while authenticating your access");
+        softAssert.assertNotNull(validationErrorResponse.getTimestamp());
+
+        softAssert.assertAll();
     }
 
     @Test(groups = {"negative", "security", "regression"})
     public void shouldReturn401WhenGettingPropertyWithInvalidCredentialsTest() {
+        initSoftAssert();
+
         AuthenticationService.setInvalidAuth();
         String propertyId = "4814adee-cd2e-4c70-921d-19b4f0cd527d";
 
         Response response = propertyService.getProperty(propertyId);
         ValidationErrorResponse validationErrorResponse = response.as(ValidationErrorResponse.class);
 
-        Assert.assertEquals(response.getStatusCode(), 401, "Expected 401 Unauthorized");
-        Assert.assertEquals(validationErrorResponse.getException(), "Bad credentials");
-        Assert.assertEquals(validationErrorResponse.getPath(), "/properties/" + propertyId);
-        Assert.assertEquals(validationErrorResponse.getError(), "Unauthorized");
-        Assert.assertEquals(validationErrorResponse.getMessage(), "Error while authenticating your access");
-        Assert.assertNotNull(validationErrorResponse.getTimestamp());
+        softAssert.assertEquals(response.getStatusCode(), 401, "Expected 401 Unauthorized");
+        softAssert.assertEquals(validationErrorResponse.getException(), "Bad credentials");
+        softAssert.assertEquals(validationErrorResponse.getPath(), "/properties/" + propertyId);
+        softAssert.assertEquals(validationErrorResponse.getError(), "Unauthorized");
+        softAssert.assertEquals(validationErrorResponse.getMessage(), "Error while authenticating your access");
+        softAssert.assertNotNull(validationErrorResponse.getTimestamp());
+
+        softAssert.assertAll();
     }
 }
