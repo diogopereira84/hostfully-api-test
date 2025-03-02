@@ -13,13 +13,19 @@ public class PropertyService implements IPropertyService {
     private static final String PROPERTY_ENDPOINT = "/properties";
 
     @Override
-    public Response getProperty(String propertyId) {
+    public Response propertyRetrieval(String propertyId) {
         return given()
                 .get(PROPERTY_ENDPOINT + "/" + propertyId);
     }
 
     @Override
-    public Response createProperty(Property property) {
+    public Response propertyRetrievalAll() {
+        return given()
+                .get(PROPERTY_ENDPOINT);
+    }
+
+    @Override
+    public Response propertyCreation(Property property) {
         return given()
                 .contentType(JSON)
                 .body(property)

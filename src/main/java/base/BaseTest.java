@@ -17,8 +17,8 @@ public class BaseTest {
     public void setup() {
         // Load environment-specific settings
         String baseUri = AppSettings.get("API_BASE_URI", "https://qa-assessment.svc.hostfully.com");
-        String username = AppSettings.get("API_USERNAME");
-        String password = AppSettings.get("API_PASSWORD");
+        String username = AppSettings.get("ADMIN_USERNAME");
+        String password = AppSettings.get("ADMIN_PASSWORD");
 
         RestAssured.baseURI = baseUri;
         authService = new AuthenticationService(username, password);

@@ -2,7 +2,6 @@ package services;
 
 import io.restassured.RestAssured;
 
-//Improve AuthenticationService, Move credentials to environment variables for security, Make it an instance-based service for testability.
 public class AuthenticationService {
 
     private final String username;
@@ -15,6 +14,17 @@ public class AuthenticationService {
 
     public void setValidAuth() {
         RestAssured.authentication = RestAssured.preemptive().basic(username, password);
+    }
+
+    public static void setAuthRole(AuthRole role) {
+        switch (role) {
+            case ADMIN_ROLE:
+            case USER_ROLE:
+                RestAssured.authentication = RestAssured.preemptive().basic(role.getUsername(), role.getPassword());
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported role: " + role);
+        }
     }
 
     public static void setInvalidAuth() {

@@ -5,6 +5,7 @@ import models.request.Property;
 
 //Applies Dependency Inversion Principle (DIP), Allows flexible implementations
 public interface IPropertyService {
-    Response getProperty(String propertyId);
-    Response createProperty(Property property);
+    Response propertyRetrieval(String propertyId);
+    Response propertyRetrievalAll();
+    Response propertyCreation(Property property);
 }
