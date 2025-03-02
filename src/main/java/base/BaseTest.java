@@ -1,9 +1,11 @@
 package base;
 
+import interfaces.IBookingService;
 import io.restassured.RestAssured;
 import org.testng.annotations.BeforeClass;
 import services.AuthenticationService;
 import interfaces.IPropertyService;
+import services.BookingService;
 import services.PropertyService;
 import utils.AppSettings;
 
@@ -12,6 +14,7 @@ public class BaseTest {
 
     protected AuthenticationService authService;
     protected IPropertyService propertyService;
+    protected IBookingService bookingService;
 
     @BeforeClass
     public void setup() {
@@ -23,6 +26,7 @@ public class BaseTest {
         RestAssured.baseURI = baseUri;
         authService = new AuthenticationService(username, password);
         propertyService = new PropertyService();
+        bookingService = new BookingService();
 
         authService.setValidAuth();
     }
