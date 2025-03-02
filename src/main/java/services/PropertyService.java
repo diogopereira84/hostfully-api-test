@@ -2,7 +2,7 @@ package services;
 
 import interfaces.IPropertyService;
 import io.restassured.response.Response;
-import models.Property;
+import models.request.Property;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;

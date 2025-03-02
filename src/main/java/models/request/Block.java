@@ -1,17 +1,17 @@
-package models;
+package models.request;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class Booking {
+@AllArgsConstructor
+@Builder
+public class Block {
     private String id;
     private String startDate;
     private String endDate;
-    private String status;
-    private Guest guest;
     private String propertyId;
 }

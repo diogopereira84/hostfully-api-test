@@ -1,7 +1,7 @@
 package interfaces;
 
 import io.restassured.response.Response;
-import models.Property;
+import models.request.Property;
 
 //Applies Dependency Inversion Principle (DIP), Allows flexible implementations
 public interface IPropertyService {

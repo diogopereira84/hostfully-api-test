@@ -1,17 +1,17 @@
-package models;
+package models.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ErrorResponse {
+public class ValidationErrorResponse {
     private String exception;
     private String path;
     private String error;
@@ -22,4 +22,5 @@ public class ErrorResponse {
     private int status;
     private String detail;
     private String instance;
+    private List<ValidationErrorDetail> errors;
 }

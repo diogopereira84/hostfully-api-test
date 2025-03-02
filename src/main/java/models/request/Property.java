@@ -1,11 +1,9 @@
-package models;
+package models.request;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
-import java.time.Instant;
 
 @Data
 @AllArgsConstructor

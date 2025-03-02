@@ -1,17 +1,20 @@
-package models;
+package models.response;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Block {
+public class PropertyResponse {
     private String id;
-    private String startDate;
-    private String endDate;
-    private String propertyId;
+    private String alias;
+    private String countryCode;
+    private List<Integer> createdAt;
 }
