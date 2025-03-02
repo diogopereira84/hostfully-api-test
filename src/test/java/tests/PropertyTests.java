@@ -18,8 +18,10 @@ import utils.DateTimeUtils;
 import utils.UUIDUtils;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Listeners(utils.TestListener.class)
 public class PropertyTests extends BaseTest {
@@ -93,6 +95,13 @@ public class PropertyTests extends BaseTest {
         Response response = propertyService.propertyRetrievalAll();
         List<PropertyResponse> propertyResponses = response.as(new io.restassured.common.mapper.TypeRef<List<PropertyResponse>>() {});
 
+        // Extract IDs and Aliases
+        List<String> ids = propertyResponses.stream().map(PropertyResponse::getId).toList();
+        List<String> aliases = propertyResponses.stream().map(PropertyResponse::getAlias).toList();
+
+        // Validate uniqueness
+        softAssert.assertEquals(new HashSet<>(ids).size(), ids.size(), "Duplicate IDs found!");
+        softAssert.assertEquals(new HashSet<>(aliases).size(), aliases.size(), "Duplicate Aliases found!");
         softAssert.assertTrue(!propertyResponses.isEmpty());
         softAssert.assertEquals(response.getStatusCode(), 200, "Expected 200 OK");
         softAssert.assertAll();
