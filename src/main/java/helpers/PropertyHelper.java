@@ -2,32 +2,53 @@ package helpers;
 
 import models.request.Property;
 import utils.DateTimeUtils;
+import utils.UUIDUtils;
+
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Helper class for constructing Property objects with various configurations.
+ */
 public class PropertyHelper {
 
-    public static Property constructProperty(List<String> fields) {
-        Property.PropertyBuilder builder = Property.builder();
-
-        String uuid = UUID.randomUUID().toString();
+    /**
+     * Creates a valid Property object with random UUID, alias, and current UTC timestamp.
+     *
+     * @return A valid Property object
+     */
+    public static Property createValidProperty() {
+        String uuid = UUIDUtils.generateUUID();
         String alias = "Property for Hostfully: " + uuid;
         String countryCode = "BR";
         String createdAt = DateTimeUtils.getCurrentUtcTimestamp();
 
-        if (fields.contains("id")) {
-            builder.id(uuid);
-        }
-        if (fields.contains("alias")) {
-            builder.alias(alias);
-        }
-        if (fields.contains("countryCode")) {
-            builder.countryCode(countryCode);
-        }
-        if (fields.contains("createdAt")) {
-            builder.createdAt(createdAt);
-        }
+        return Property.builder()
+                .id(uuid)
+                .alias(alias)
+                .countryCode(countryCode)
+                .createdAt(createdAt)
+                .build();
+    }
 
-        return builder.build();
+    /**
+     * Constructs a Property object based on provided fields.
+     * - If a field is not in the list, it is set to null (simulating missing fields).
+     *
+     * @param fields List of fields to include in the Property object.
+     * @return A Property object with the specified fields.
+     */
+    public static Property constructProperty(List<String> fields) {
+        String uuid = fields.contains("id") ? UUIDUtils.generateUUID() : null;
+        String alias = fields.contains("alias") ? "Property for Hostfully" : null;
+        String countryCode = fields.contains("countryCode") ? "BR" : null;
+        String createdAt = fields.contains("createdAt") ? DateTimeUtils.getCurrentUtcTimestamp() : null;
+
+        return Property.builder()
+                .id(uuid)
+                .alias(alias)
+                .countryCode(countryCode)
+                .createdAt(createdAt)
+                .build();
     }
 }
