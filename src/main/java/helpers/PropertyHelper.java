@@ -32,6 +32,20 @@ public class PropertyHelper {
     }
 
     /**
+     * Creates a Property object
+     *
+     * @return A Property object
+     */
+    public static Property createProperty(String id, String alias, String countryCode, String createdAt) {
+        return Property.builder()
+                .id(id.isEmpty() ? null : id)
+                .alias(alias.isEmpty() ? null : alias)
+                .countryCode(countryCode.isEmpty() ? null : countryCode)
+                .createdAt(createdAt.isEmpty() ? null : createdAt)
+                .build();
+    }
+
+    /**
      * Constructs a Property object based on provided fields.
      * - If a field is not in the list, it is set to null (simulating missing fields).
      *

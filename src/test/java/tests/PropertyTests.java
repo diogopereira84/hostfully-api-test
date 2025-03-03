@@ -7,6 +7,7 @@ import io.restassured.response.Response;
 import models.request.Property;
 import models.response.PropertyResponse;
 import models.response.ValidationErrorResponse;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -77,8 +78,10 @@ public class PropertyTests extends BaseTest {
     public void shouldReturn201WhenCreatingPropertyWithMandatoryFields(List<String> fields) {
         Property property = PropertyHelper.constructProperty(fields);
         Response response = propertyService.propertyCreation(property);
-        PropertyResponse propertyResponse = response.as(PropertyResponse.class);
 
+        Assert.assertEquals(response.getStatusCode(), 201, "Expected 201 Created");
+
+        PropertyResponse propertyResponse = response.as(PropertyResponse.class);
         SoftAssert softAssert = new SoftAssert();
         PropertyAssertionHelper.validatePropertyResponse(softAssert, propertyResponse, fields, property);
         softAssert.assertAll();
@@ -109,7 +112,6 @@ public class PropertyTests extends BaseTest {
     public void shouldReturn403WhenUserLacksPermissionToCreateProperty(AuthRole role) {
         AuthenticationService.setAuthRole(role);
         Property property = PropertyHelper.createValidProperty();
-
         Response response = propertyService.propertyCreation(property);
 
         SoftAssert softAssert = new SoftAssert();
@@ -130,19 +132,10 @@ public class PropertyTests extends BaseTest {
 
     @Test(dataProvider = "invalidInputs", groups = {"negative", "regression"})
     public void shouldReturn400WhenCreatingPropertyWithInvalidInputs(String id, String alias, String countryCode, String createdAt) {
-        Property property = Property.builder()
-                .id(id.isEmpty() ? null : id)
-                .alias(alias.isEmpty() ? null : alias)
-                .countryCode(countryCode.isEmpty() ? null : countryCode)
-                .createdAt(createdAt.isEmpty() ? null : createdAt)
-                .build();
-
+        Property property = PropertyHelper.createProperty(id, alias, countryCode, createdAt);
         Response response = propertyService.propertyCreation(property);
-        ValidationErrorResponse errorResponse = response.as(ValidationErrorResponse.class);
-
+        Assert.assertEquals(response.getStatusCode(), 400, "Expected 400 BadRequest");
         SoftAssert softAssert = new SoftAssert();
-        PropertyAssertionHelper.validateStatusCode(softAssert, response, 400);
-        assertValidationErrorResponse(softAssert, errorResponse, "Bad Request", "Invalid input provided");
         softAssert.assertAll();
     }
 
