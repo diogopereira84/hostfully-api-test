@@ -1,11 +1,13 @@
 package tests;
 
 import base.BaseTest;
+import helpers.BookingHelper;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
 import models.request.Booking;
 import models.request.Guest;
 import models.response.*;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -78,10 +80,6 @@ public class BookingTests extends BaseTest {
         Response response = bookingService.bookingRetrievalAll();
         List<BookingResponse> bookingResponses = response.as(new io.restassured.common.mapper.TypeRef<List<BookingResponse>>() {});
 
-        // Extract IDs and PropertyIds
-        List<String> ids = bookingResponses.stream().map(BookingResponse::getId).toList();
-        List<String> aliases = bookingResponses.stream().map(BookingResponse::getPropertyId).toList();
-
         // Validate uniqueness
         softAssert.assertTrue(!bookingResponses.isEmpty());
         softAssert.assertEquals(response.getStatusCode(), 200, "Expected 200 OK");
@@ -138,25 +136,13 @@ public class BookingTests extends BaseTest {
     @Test(groups = {"positive", "regression"})
     public void shouldReturn201WhenGettingBookingCreationTest() {
         initSoftAssert();
-        String newUUID = UUID.randomUUID().toString();
         String targetPropertyId = "e38698fc-2944-4c1a-9cc2-afbd5993d2ed";
 
         String lastBookedDate = getLastBookedDate(targetPropertyId);
         String endDate = DateTimeUtils.addOneDay(lastBookedDate);
 
         // Validate booking details
-        Booking book = Booking.builder()
-                .id(newUUID)
-                .startDate(lastBookedDate)
-                .endDate(endDate)
-                .status("SCHEDULED")
-                .guest(Guest.builder()
-                        .firstName("Diogo")
-                        .lastName("Pereira")
-                        .dateOfBirth("1984-05-18")
-                        .build())
-                .propertyId(targetPropertyId)
-                .build();
+        Booking book = BookingHelper.createBookingUsingAvailableDates(targetPropertyId);
 
         Response response = bookingService.bookingCreation(book);
         BookingResponse bookingResponse = response.as(BookingResponse.class);
@@ -217,14 +203,7 @@ public class BookingTests extends BaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         // Create a booking with missing mandatory fields, but all optional fields included
-        Booking book = Booking.builder()
-                .id(id)
-                .startDate(startDate)
-                .endDate(endDate)
-                .propertyId(propertyId)
-                .status(status)
-                .guest(guest)
-                .build();
+        Booking book = BookingHelper.createBooking(id, startDate, endDate, propertyId, status, guest);
 
         // Send request
         Response response = bookingService.bookingCreation(book);
@@ -274,25 +253,17 @@ public class BookingTests extends BaseTest {
         SoftAssert softAssert = new SoftAssert();
 
         // Create a booking with varying fields
-        Booking book = Booking.builder()
-                .id(id)
-                .startDate(startDate)
-                .endDate(endDate)
-                .propertyId(propertyId)
-                .status(status)
-                .guest(guest)
-                .build();
+        Booking book = BookingHelper.createBooking(id, startDate, endDate, propertyId, status, guest);
 
         // Send request
         Response response = bookingService.bookingCreation(book);
+        // Assert HTTP status code
+        Assert.assertEquals(response.getStatusCode(), 201, "Expected 201 Created");
         BookingResponse bookingResponse = response.as(BookingResponse.class);
 
         String expectedStartDate = DateTimeUtils.formatDate(bookingResponse.getStartDate());
         String expectedEndDate = DateTimeUtils.formatDate(bookingResponse.getEndDate());
         String expectedDateOfBirth = DateTimeUtils.formatDate(bookingResponse.getGuest().getDateOfBirth());
-
-        // Assert HTTP status code
-        softAssert.assertEquals(response.getStatusCode(), 201, "Expected 201 Created");
 
         // Validate JSON Response Fields
         softAssert.assertNotNull(bookingResponse.getId(), "Booking ID should not be null");
@@ -320,25 +291,13 @@ public class BookingTests extends BaseTest {
         };
     }
 
-    @Test(dataProvider = "unavailableDates", groups = {"negative", "regression"})
-    public void shouldReturn422ForBookingDateUnavailableWhenGettingBookingCreationTest(String startDate, String endDate) {
+    @Test(groups = {"negative", "regression"})
+    public void shouldReturn422ForBookingDateUnavailableWhenGettingBookingCreationTest() {
         initSoftAssert();
-        String newUUID = UUID.randomUUID().toString();
         String targetPropertyId = "201c3466-153a-403b-9434-e3ff413a84cc";
 
-        // Validate booking details
-        Booking book = Booking.builder()
-                .id(newUUID)
-                .startDate(startDate)
-                .endDate(endDate)
-                .status("SCHEDULED")
-                .guest(Guest.builder()
-                        .firstName("Diogo")
-                        .lastName("Pereira")
-                        .dateOfBirth("1984-05-18")
-                        .build())
-                .propertyId(targetPropertyId)
-                .build();
+        // Create booking
+        Booking book = BookingHelper.createBookingUsingAvailableDates(targetPropertyId);
 
         Response response = bookingService.bookingCreation(book);
         // Deserialize JSON response into BookingErrorResponse model

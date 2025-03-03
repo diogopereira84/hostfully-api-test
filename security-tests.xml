@@ -1,0 +1,12 @@
+<suite name="Security Test Suite">
+    <test name="Security Tests">
+        <groups>
+            <run>
+                <include name="security"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="tests.BookingTests"/>
+        </classes>
+    </test>
+</suite>

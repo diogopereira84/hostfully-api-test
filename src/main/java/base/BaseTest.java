@@ -12,9 +12,10 @@ import utils.AppSettings;
 // BaseTest for Dependency Injection with parameterized environment
 public class BaseTest {
 
-    protected AuthenticationService authService;
-    protected IPropertyService propertyService;
-    protected IBookingService bookingService;
+    public AuthenticationService authService;
+    public IPropertyService propertyService;
+    public IBookingService bookingService;
+
 
     @BeforeClass
     public void setup() {

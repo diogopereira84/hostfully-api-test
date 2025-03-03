@@ -1,7 +1,8 @@
-<suite name="Hostfully API Suite">
-    <test name="Property API Tests">
+<suite name="Full Test Suite">
+    <test name="All Tests">
         <classes>
             <class name="tests.PropertyTests"/>
+            <class name="tests.BookingTests"/>
         </classes>
     </test>
 </suite>
