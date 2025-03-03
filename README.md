@@ -49,7 +49,6 @@ Installation
 Clone the repository:
 
 git clone https://github.com/diogopereira84/hostfully-api-test.git
-cd booking-test-suite
 
 Install dependencies:
 
