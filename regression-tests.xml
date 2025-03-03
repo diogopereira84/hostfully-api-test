@@ -1,0 +1,13 @@
+<suite name="Regression Test Suite">
+    <test name="Regression Tests">
+        <groups>
+            <run>
+                <include name="regression"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="tests.PropertyTests"/>
+            <class name="tests.BookingTests"/>
+        </classes>
+    </test>
+</suite>

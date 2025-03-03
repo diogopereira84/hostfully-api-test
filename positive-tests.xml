@@ -1,0 +1,13 @@
+<suite name="Positive Tests Suite">
+    <test name="Positive Tests">
+        <groups>
+            <run>
+                <include name="positive"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="tests.PropertyTests"/>
+            <class name="tests.BookingTests"/>
+        </classes>
+    </test>
+</suite>
