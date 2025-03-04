@@ -17,7 +17,7 @@ public class BaseTest {
     public IBookingService bookingService;
 
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void setup() {
         // Load environment-specific settings
         String baseUri = AppSettings.get("API_BASE_URI", "https://qa-assessment.svc.hostfully.com");
