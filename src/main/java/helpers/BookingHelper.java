@@ -2,15 +2,12 @@ package helpers;
 
 import models.request.Booking;
 import models.request.Guest;
-import models.request.Property;
 import models.response.BookingResponse;
-import models.response.GuestResponse;
 import services.BookingService;
 import utils.DateTimeUtils;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +26,7 @@ public class BookingHelper {
      */
     public static Booking createValidBooking(String propertyId) {
         String lastBookedDate = getLastBookedDate(propertyId);
-        String endDate = DateTimeUtils.addOneDay(lastBookedDate);
+        String endDate = DateTimeUtils.addDays(lastBookedDate, 1);
 
         return Booking.builder()
                 .id(UUID.randomUUID().toString())
@@ -49,7 +46,7 @@ public class BookingHelper {
      */
     public static Booking createBookingUsingAvailableDates(String propertyId) {
         String lastBookedDate = getLastBookedDate(propertyId);
-        String endDate = DateTimeUtils.addOneDay(lastBookedDate);
+        String endDate = DateTimeUtils.addDays(lastBookedDate, 1);
 
         return Booking.builder()
                 .id(UUID.randomUUID().toString())
@@ -97,5 +94,18 @@ public class BookingHelper {
                 .map(b -> DateTimeUtils.formatDate(b.getEndDate()))
                 .reduce((first, second) -> second) // Get last occurrence
                 .orElse(DateTimeUtils.getCurrentUtcTimestamp()); // Default to current date if no bookings exist
+    }
+
+    public static Booking createCustomBooking(String propertyId, String startDate, String endDate) {
+
+        return Booking.builder()
+                .id(UUID.randomUUID().toString())
+                .startDate(startDate)
+                .endDate(endDate)
+                .status("SCHEDULED")
+                .guest(new Guest("Diogo", "Pereira", "1984-05-18"))
+                .propertyId(propertyId)
+                .build();
+
     }
 }

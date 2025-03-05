@@ -15,7 +15,6 @@ import org.testng.asserts.SoftAssert;
 import services.AuthRole;
 import services.AuthenticationService;
 import utils.DateTimeUtils;
-
 import java.util.*;
 
 @Listeners(utils.TestListener.class)
@@ -28,6 +27,51 @@ public class BookingTests extends BaseTest {
      */
     private void initSoftAssert() {
         softAssert = new SoftAssert();
+    }
+
+    @DataProvider(name = "overlappingBookingData")
+    public Object[][] overlappingBookingData() {
+        String propertyId = "323695f1-d8d9-4e59-83a6-354ec2ddd383"; // Test property ID
+        String existingStartDate = DateTimeUtils.getCurrentUtcTimestamp();
+        String existingEndDate = DateTimeUtils.addDays(existingStartDate, 3);
+
+        return new Object[][]{
+                {propertyId, existingStartDate, existingEndDate, "same-dates"},
+                {propertyId, DateTimeUtils.addDays(existingStartDate, 1), DateTimeUtils.addDays(existingEndDate, 2), "inside-existing"},
+                {propertyId, DateTimeUtils.subtractDays(existingStartDate, 1), existingStartDate, "overlapping-start"},
+                {propertyId, existingEndDate, DateTimeUtils.addDays(existingEndDate, 1), "overlapping-end"},
+                {propertyId, DateTimeUtils.subtractDays(existingStartDate, 1), DateTimeUtils.addDays(existingEndDate, 1), "encompassing-existing"}
+        };
+    }
+
+    @Test(groups = {"negative", "regression"}, dataProvider = "overlappingBookingData")
+    public void shouldNotAllowOverlappingBookings(String propertyId, String startDate, String endDate, String scenario) {
+        initSoftAssert();
+
+        // Step 1: Create a valid booking
+        Booking validBooking = BookingHelper.createBookingUsingAvailableDates(propertyId);
+        Response initialResponse = bookingService.bookingCreation(validBooking);
+        softAssert.assertEquals(initialResponse.getStatusCode(), 201, "Initial booking should be successful");
+
+        // Step 2: Attempt to create an overlapping booking
+        Booking overlappingBooking = BookingHelper.createCustomBooking(propertyId, startDate, endDate);
+        Response overlapResponse = bookingService.bookingCreation(overlappingBooking);
+
+        // Step 3: Validate that the response indicates a conflict or error
+        Assert.assertEquals(overlapResponse.getStatusCode(), 422, "Expected 422 : " + scenario);
+
+        // Deserialize JSON response into BookingErrorResponse model
+        BookingErrorResponse errorResponse = overlapResponse.as(BookingErrorResponse.class);
+
+        // Assertions on error response fields
+        softAssert.assertEquals(errorResponse.getType(), "https://www.hostfully.com/problems/invalid-booking", "Error type mismatch");
+        softAssert.assertEquals(errorResponse.getTitle(), "Invalid Booking", "Error title mismatch");
+        softAssert.assertEquals(errorResponse.getStatus(), 422, "Status code should match 422");
+        softAssert.assertEquals(errorResponse.getDetail(), "Supplied booking is not valid", "Error detail mismatch");
+        softAssert.assertEquals(errorResponse.getInstance(), "/bookings", "Instance path mismatch");
+        softAssert.assertEquals(errorResponse.getBookingDatesUnavailable(), "BOOKING_DATES_UNAVAILABLE", "Booking dates unavailable error mismatch");
+
+        softAssert.assertAll();
     }
 
     @Test(groups = {"positive", "regression"})
@@ -139,7 +183,7 @@ public class BookingTests extends BaseTest {
         String targetPropertyId = "e38698fc-2944-4c1a-9cc2-afbd5993d2ed";
 
         String lastBookedDate = getLastBookedDate(targetPropertyId);
-        String endDate = DateTimeUtils.addOneDay(lastBookedDate);
+        String endDate = DateTimeUtils.addDays(lastBookedDate, 1);
 
         // Validate booking details
         Booking book = BookingHelper.createBookingUsingAvailableDates(targetPropertyId);
@@ -230,7 +274,7 @@ public class BookingTests extends BaseTest {
     public Object[][] provideBookingCombinations() {
         String targetPropertyId = "e38698fc-2944-4c1a-9cc2-afbd5993d2ed";
         String startDate = getLastBookedDate(targetPropertyId);
-        String endDate = DateTimeUtils.addOneDay(startDate);
+        String endDate = DateTimeUtils.addDays(startDate, 1);
 
         return new Object[][]{
                 // Mandatory fields only

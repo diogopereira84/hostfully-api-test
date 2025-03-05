@@ -18,16 +18,31 @@ public class DateTimeUtils {
         return FORMATTER_HH.format(Instant.now());
     }
 
-    /**
-     * Adds one day to the given date string in "YYYY-MM-DD" format.
-     *
-     * @param dateString The input date string in "YYYY-MM-DD" format.
-     * @return The new date string after adding one day, or an error message if parsing fails.
-     */
-    public static String addOneDay(String dateString) {
+    public static String getCurrentTimeInYYYYMMddFormat() {
+        return FORMATTER.format(Instant.now());
+    }
+
+    public static String addDays(String dateString, int days) {
+        try {
+            // Normalize dateString to YYYY-MM-DD if it contains time information
+            if (dateString.contains("T")) {
+                dateString = dateString.substring(0, 10); // Extract YYYY-MM-DD part
+            }
+
+            LocalDate date = LocalDate.parse(dateString, FORMATTER);
+            LocalDate nextDay = date.plusDays(days);
+            return nextDay.format(FORMATTER);
+        } catch (DateTimeParseException e) {
+            return "Invalid date format. Please use YYYY-MM-DD.";
+        }
+    }
+
+
+
+    public static String subtractDays(String dateString, int days) {
         try {
             LocalDate date = LocalDate.parse(dateString, FORMATTER);
-            LocalDate nextDay = date.plusDays(1);
+            LocalDate nextDay = date.minusDays(days);
             return nextDay.format(FORMATTER);
         } catch (DateTimeParseException e) {
             return "Invalid date format. Please use YYYY-MM-DD.";
